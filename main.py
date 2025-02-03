@@ -143,11 +143,10 @@ def run_game():
 
 def show_splash_screen():
     screen.fill(BLACK)
-    title_text = font.render("Тренажер памяти - запомни или умри", True, WHITE)
-    instruction_text = font.render("Ваша задача - запомнить последовательность", True, WHITE)
-    screen.blit(title_text, (100, HEIGHT // 2 - FONT_SIZE))
-    screen.blit(instruction_text, (100, HEIGHT // 2))
-
+    title_text = font.render("Тренажер памяти", True, WHITE)
+    instruction_text = font.render("Запомни последовательность", True, WHITE)
+    screen.blit(title_text, (10, HEIGHT // 2 - FONT_SIZE))
+    screen.blit(instruction_text, (10, HEIGHT // 2))
     pygame.display.flip()
     time.sleep(3)
 
@@ -156,15 +155,15 @@ def show_menu():
     while True:
         screen.fill(BLACK)
         menu_texts = [
-            "1. Посмотреть таблицу победителей",
-            "2. Посмотреть таблицу участников",
-            "3. Начать игру",
-            "4. Выход"
+            "1. Таблица победителей(UP)",
+            "2. Таблица участников(DOWN)",
+            "3. Начать игру(SPACE)",
+            "4. Выход(ESCAPE)"
         ]
 
         for i, text in enumerate(menu_texts):
             rendered_text = font.render(text, True, WHITE)
-            screen.blit(rendered_text, (100, 100 + i * 50))
+            screen.blit(rendered_text, (5, 100 + i * 100))
 
         pygame.display.flip()
 
@@ -173,13 +172,13 @@ def show_menu():
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
+                if event.key == pygame.K_UP:
                     pass
-                elif event.key == pygame.K_2:
+                elif event.key == pygame.K_DOWN:
                     pass
                 elif event.key == pygame.K_SPACE:
                     run_game()
-                elif event.key == pygame.K_4:
+                elif event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     exit()
 
