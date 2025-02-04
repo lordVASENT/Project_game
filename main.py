@@ -1,6 +1,8 @@
 import pygame
 import random
 import time
+import math
+import sqlite3
 
 pygame.init()
 
@@ -13,6 +15,13 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = ['Red', 'Green', 'Blue', 'White',
           'Black', 'Yellow', 'Gray']
+FPS = 60
+NUM_STARS = 100
+EXPLOSION_TIME = 2
+
+star_image = pygame.image.load("STAR.png")
+star_rect = star_image.get_rect()
+
 
 font = pygame.font.Font(None, 74)
 small_font = pygame.font.Font(None, 36)
@@ -112,7 +121,34 @@ def run_game():
             break
 
         level += 1
+        draw_effect()
 
+    if level == 11:
+        end_run(player_name, level)
+
+        con = sqlite3.connect("database_game")
+        cur = con.cursor()
+        cur.execute("""INSERT INTO WINNER(NICK, LEVEL_NUMBER) 
+                            VALUES(?, ?)""",
+                    (player_name, level - 1))
+        con.commit()
+        con.close()
+
+    elif level < 11:
+        end_run(player_name, level)
+
+
+def add_MEMBER(player_name, level):
+    con = sqlite3.connect("database_game")
+    cur = con.cursor()
+    cur.execute("""INSERT INTO MEMBERS(NICK, LEVEL_NUMBER) 
+                                VALUES(?, ?)""",
+                (player_name, level - 1))
+    con.commit()
+    con.close()
+
+
+def end_run(player_name, level):
     screen.fill(WHITE)
     display_text("Игра окончена!",
                  small_font.get_height(),
@@ -120,7 +156,7 @@ def run_game():
                  WIDTH // 2,
                  HEIGHT // 2 - 50)
 
-    display_text(f"Ваш ник: {player_name}",
+    display_text(f"Спасибо за участие!",
                  small_font.get_height(),
                  BLACK,
                  WIDTH // 2,
@@ -132,6 +168,7 @@ def run_game():
                  WIDTH // 2,
                  HEIGHT // 2 + 50)
 
+    add_MEMBER(player_name, level)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -139,6 +176,52 @@ def run_game():
                 return
 
         pygame.display.flip()
+
+
+class Star:
+    def __init__(self):
+        angle = random.uniform(0, 2 * math.pi)
+        speed = random.uniform(200, 400)
+        self.dx = speed * math.cos(angle)
+        self.dy = speed * math.sin(angle)
+        self.x = WIDTH // 2
+        self.y = HEIGHT // 2
+        self.lifetime = EXPLOSION_TIME
+
+    def update(self, dt):
+        self.x += self.dx * dt
+        self.y += self.dy * dt
+        self.lifetime -= dt
+
+    def draw(self, surface):
+        if self.lifetime > 0:
+            surface.blit(star_image, (self.x, self.y))
+
+
+def draw_effect():
+    star_rect.x = WIDTH // 2
+    star_rect.y = HEIGHT // 2
+    start_time = time.time()
+    clock = pygame.time.Clock()
+    stars = [Star() for _ in range(NUM_STARS)]
+    while True:
+        dt = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+        screen.fill((0, 0, 0))
+        screen.fill((0, 0, 0))
+
+        for star in stars:
+            star.update(dt)
+            star.draw(screen)
+        stars = [star for star in stars if star.lifetime > 0]
+        pygame.display.flip()
+
+        if time.time() - start_time > 2:
+            break
 
 
 def show_splash_screen():
