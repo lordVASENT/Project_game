@@ -13,15 +13,15 @@ pygame.display.set_caption("Memory Game")
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-COLORS = ['Red', 'Green', 'Blue', 'White',
-          'Black', 'Yellow', 'Gray']
+COLORS = ['Red', 'Green', 'Blue',
+          'Yellow', 'Purple', 'Aqua', 'Silver']
 FPS = 60
 NUM_STARS = 100
 EXPLOSION_TIME = 2
+border_width = 5
 
 star_image = pygame.image.load("STAR.png")
 star_rect = star_image.get_rect()
-
 
 font = pygame.font.Font(None, 74)
 small_font = pygame.font.Font(None, 36)
@@ -68,19 +68,43 @@ def run_game():
     level = 1
     while level <= 10:
         length = level + 4
-        sequence = generate_numbers(length)
+        if level % 2 == 1:
+            sequence = generate_numbers(length)
+        else:
+            sequence = generate_colors(length)
+        new_sequence = ''
+        for i in sequence:
+            if i.isdigit():
+                new_sequence += i
+            else:
+                new_sequence += i[0]
         prompt_text = "Запомните: "
         screen.fill(WHITE)
         display_text(prompt_text,
                      font_size=74,
                      color=BLACK,
-                     x = WIDTH // 2,
-                     y = HEIGHT // 2 - 50)
-        display_text(" ".join(sequence),
-                     font_size=74,
-                     color=BLACK,
                      x=WIDTH // 2,
-                     y=HEIGHT // 2 + 50)
+                     y=HEIGHT // 2 - 50)
+        if level % 2 == 1:
+            display_text(" ".join(sequence),
+                         font_size=74,
+                         color=BLACK,
+                         x=WIDTH // 2,
+                         y=HEIGHT // 2 + 50)
+        else:
+            for i in range(len(sequence)):
+                pygame.draw.rect(screen,
+                                 sequence[i],
+                                 (WIDTH // (length + 1) * (i + 1) - WIDTH // (length + 1) // 2,
+                                  HEIGHT // 2 + 50,
+                                  WIDTH // (length + 1),
+                                  HEIGHT // 10))
+                pygame.draw.rect(screen,
+                                 WHITE,
+                                 (WIDTH // (length + 1) * (i + 1) - WIDTH // (length + 1) // 2,
+                                  HEIGHT // 2 + 50,
+                                  WIDTH // (length + 1),
+                                  HEIGHT // 10), border_width)
 
         pygame.display.flip()
         time.sleep(7)
@@ -116,10 +140,8 @@ def run_game():
                          HEIGHT // 2 + 50)
 
             pygame.display.flip()
-
-        if user_input != "".join(sequence):
+        if user_input != new_sequence:
             break
-
         level += 1
         draw_effect()
 
@@ -136,16 +158,6 @@ def run_game():
 
     elif level < 11:
         end_run(player_name, level)
-
-
-def add_MEMBER(player_name, level):
-    con = sqlite3.connect("database_game")
-    cur = con.cursor()
-    cur.execute("""INSERT INTO MEMBERS(NICK, LEVEL_NUMBER) 
-                                VALUES(?, ?)""",
-                (player_name, level - 1))
-    con.commit()
-    con.close()
 
 
 def end_run(player_name, level):
@@ -168,7 +180,13 @@ def end_run(player_name, level):
                  WIDTH // 2,
                  HEIGHT // 2 + 50)
 
-    add_MEMBER(player_name, level)
+    con = sqlite3.connect("database_game")
+    cur = con.cursor()
+    cur.execute("""INSERT INTO MEMBERS(NICK, LEVEL_NUMBER) 
+                                    VALUES(?, ?)""",
+                (player_name, level - 1))
+    con.commit()
+    con.close()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -255,10 +273,77 @@ def show_menu():
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    pass
-                elif event.key == pygame.K_DOWN:
-                    pass
+                if event.key == pygame.K_DOWN:
+                    conn = sqlite3.connect('database_game')
+                    cursor = conn.cursor()
+
+                    cursor.execute("SELECT * FROM MEMBERS")
+                    data = cursor.fetchall()
+                    conn.close()
+
+                    text_x = 0
+                    text_y = 0
+                    line_height = 25
+
+                    while True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT or (
+                                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                                show_menu()
+                                return
+
+                        pygame.display.flip()
+                        screen.fill(WHITE)
+
+                        for row in data:
+                            id_text = small_font.render(f"ID: {row[0]}", True, BLACK)
+                            nick_text = small_font.render(f"NICK: {row[1]}", True, BLACK)
+                            levels_text = small_font.render(f"LEVELS: {row[2]}", True, BLACK)
+
+                            screen.blit(id_text, (text_x, text_y))
+                            screen.blit(nick_text, (text_x + 150, text_y))
+                            screen.blit(levels_text, (text_x + 500, text_y))
+
+                            text_y += line_height
+
+                        pygame.display.flip()
+                        text_y = 50
+
+                elif event.key == pygame.K_UP:
+                    conn = sqlite3.connect('database_game')
+                    cursor = conn.cursor()
+
+                    cursor.execute("SELECT * FROM WINNER")
+                    data = cursor.fetchall()
+                    conn.close()
+
+                    text_x = 0
+                    text_y = 0
+                    line_height = 25
+
+                    while True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT or (
+                                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                                show_menu()
+                                return
+
+                        pygame.display.flip()
+                        screen.fill(WHITE)
+
+                        for row in data:
+                            id_text = small_font.render(f"ID: {row[0]}", True, BLACK)
+                            nick_text = small_font.render(f"NICK: {row[1]}", True, BLACK)
+                            levels_text = small_font.render(f"LEVELS: {row[2]}", True, BLACK)
+
+                            screen.blit(id_text, (text_x, text_y))
+                            screen.blit(nick_text, (text_x + 150, text_y))
+                            screen.blit(levels_text, (text_x + 500, text_y))
+
+                            text_y += line_height
+
+                        pygame.display.flip()
+                        text_y = 50
                 elif event.key == pygame.K_SPACE:
                     run_game()
                 elif event.key == pygame.K_ESCAPE:
