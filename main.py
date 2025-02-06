@@ -67,7 +67,7 @@ def run_game():
 
     level = 1
     while level <= 10:
-        length = level + 4
+        length = level // 2 + 4
         if level % 2 == 1:
             sequence = generate_numbers(length)
         else:
@@ -127,10 +127,10 @@ def run_game():
                         user_input += event.unicode
 
             screen.fill(WHITE)
-            display_text("Введите последовательность:",
+            display_text("Введите последовательность и нажмите ENTER:",
                          small_font.get_height(),
                          BLACK,
-                         WIDTH // 2,
+                         WIDTH // 2 - 100,
                          HEIGHT // 2 - 50)
 
             display_text(user_input,
@@ -138,6 +138,21 @@ def run_game():
                          BLACK,
                          WIDTH // 2,
                          HEIGHT // 2 + 50)
+            display_text("Для ввода цвета используйте первую заглавную букву без пробела",
+                         small_font.get_height(),
+                         BLACK,
+                         WIDTH // 2 - 100,
+                         HEIGHT // 2 + 100)
+            display_text("Красный red - R; Голубой aqua- A; Фиолетовый purple- P",
+                         small_font.get_height(),
+                         BLACK,
+                         WIDTH // 2 - 100,
+                         HEIGHT // 2 + 150)
+            display_text("Серый silver - S; Зеленый green - G; Синий blue - B; Жёлтый yellow - Y",
+                         small_font.get_height(),
+                         BLACK,
+                         WIDTH // 2 - 100,
+                         HEIGHT // 2 + 200)
 
             pygame.display.flip()
         if user_input != new_sequence:
@@ -246,10 +261,12 @@ def show_splash_screen():
     screen.fill(BLACK)
     title_text = font.render("Тренажер памяти", True, WHITE)
     instruction_text = font.render("Запомни последовательность", True, WHITE)
+    instruction_text2 = font.render("На запоминание 7сек", True, WHITE)
     screen.blit(title_text, (10, HEIGHT // 2 - FONT_SIZE))
     screen.blit(instruction_text, (10, HEIGHT // 2))
+    screen.blit(instruction_text2, (10, HEIGHT // 2 + FONT_SIZE))
     pygame.display.flip()
-    time.sleep(3)
+    time.sleep(5)
 
 
 def show_menu():
