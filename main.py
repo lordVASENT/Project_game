@@ -269,6 +269,9 @@ def show_splash_screen():
     time.sleep(5)
 
 
+show_splash_screen()
+
+
 def show_menu():
     while True:
         screen.fill(BLACK)
@@ -368,5 +371,4 @@ def show_menu():
                     exit()
 
 
-show_splash_screen()
 show_menu()
