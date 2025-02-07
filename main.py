@@ -67,7 +67,7 @@ def run_game():
 
     level = 1
     while level <= 10:
-        length = level // 2 + 4
+        length = level // 2 + 5
         if level % 2 == 1:
             sequence = generate_numbers(length)
         else:
